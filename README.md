@@ -67,13 +67,13 @@
 
 ඔයාට මේ Bot ව තවත් ලස්සන කරන්න හෝ අලුත් Features එකතු කරන්න උදව් වෙන්න පුළුවන්!
 
-*   🧑‍💻 **Developer:** [Your Name](https://github.com/YourUsername)
+*   🧑‍💻 **Developer:** [Your Name](https://github.com/mrhanasaja6-hue)
 *   💬 **WhatsApp Group:** [Join Our Community](https://chat.whatsapp.com/YourLink)
 *   📢 **News Channel:** [Subscribe Now](https://whatsapp.com/channel/YourLink)
 
 ---
 
 <p align="center">
-  Made with ❤️ by <b>ZAKUNA-MD Team</b>. <br>
+  Made with Ndil Hasaja by <b>ZAKUNA-MD Team</b>. <br>
   Don't forget to give a ⭐ to this repository if you like it!
 </p>
