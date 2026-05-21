@@ -1,87 +1,107 @@
-const { default: makeWASocket, useMultiFileAuthState, delay } = require('@whiskeysockets/baileys');
-const pino = require('pino');
-const yts = require('yt-search');
+cat << 'EOF' > index.js
+const { default: makeWASocket, useMultiFileAuthState, delay, fetchLatestBaileysVersion } = require("@whiskeysockets/baileys");
+const pino = require("pino");
+const yts = require("yt-search");
+const config = require("./config");
+
+const botImage = "https://i.ibb.co/qYsSXZrJ/dc031647f9ada8c8e991301709c54b76.jpg";
+const startTime = new Date();
+
+function getUptime() {
+    const now = new Date();
+    const diff = now - startTime;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    return `${hours}h ${minutes}m ${seconds}s`;
+}
 
 async function startBot() {
-    const { state, saveCreds } = await useMultiFileAuthState('auth_info');
-    const sock = makeWASocket({
-        logger: pino({ level: 'silent' }),
+    const { state, saveCreds } = await useMultiFileAuthState("session");
+    const { version } = await fetchLatestBaileysVersion();
+    
+    const conn = makeWASocket({
         auth: state,
-        browser: ['Zakuna-Mini', 'Chrome', '1.0.0']
+        logger: pino({ level: "silent" }),
+        browser: ["ZAKUNA-MD", "Safari", "1.0.0"],
+        version
     });
 
-    // Pairing Code එක
-    if (!sock.authState.creds.registered) {
-        const phoneNumber = '947XXXXXXXX'; // ඔයාගේ නම්බර් එක මෙතන දාන්න
-        const code = await sock.requestPairingCode(phoneNumber);
-        console.log(`Pairing Code: ${code}`);
-    }
+    conn.ev.on("creds.update", saveCreds);
+    
+    conn.ev.on("messages.upsert", async (chatUpdate) => {
+        const mek = chatUpdate.messages[0];
+        if (!mek.message) return;
+        const from = mek.key.remoteJid;
+        const body = mek.message.conversation || mek.message.extendedTextMessage?.text || "";
+        const command = body.split(" ")[0].toLowerCase();
 
-    sock.ev.on('messages.upsert', async m => {
-        const msg = m.messages[0];
-        if (!msg.message) return;
-        
-        const from = msg.key.remoteJid;
-        const text = msg.message.conversation || msg.message.extendedTextMessage?.text;
+        if (command === '.alive') {
+            let aliveMsg = `*ᴢᴀᴋᴜɴᴀ-ᴍᴅ IS ALIVE*
+╭━━━〔 ᴢᴀᴋᴜɴᴀ-ᴍᴅ 〕━━━╮
 
-        // 1. Status Seen & Auto React
-        if (from === 'status@broadcast') {
-            await sock.readMessages([msg.key]);
-            await sock.sendMessage(from, { react: { text: '❤️', key: msg.key } });
-            return;
+*╭────────────➣*
+*┃Hey...I’m ᴢᴀᴋᴜɴᴀ-ᴍᴅ🙃*
+*┃ɪ'ᴍ ᴀᴄᴛɪᴠᴇ ᴀɴᴅ ʀᴇᴀᴅʏ ᴛᴏ ʜᴇʟᴘ ʏᴏᴜ!*
+*╰──────────────➣*
+
+*╭──〔 𝐒𝐲𝐬𝐭𝐞𝐦 𝐈𝐧𝐟𝐨 〕──➣*
+*┃🗓 ᴅᴀᴛᴇ :* ${new Date().toLocaleDateString()}
+*┃⌚ ᴛɪᴍᴇ :* ${new Date().toLocaleTimeString()}
+*┃⚙ ᴠᴇʀsɪᴏɴ :* 1.0.1
+*┃💬 ᴘʀᴇғɪx :* .
+*╰──────────────➣*
+
+*╭──〔 𝐂𝐨𝐧𝐭𝐚𝐜𝐭 𝐔𝐬 〕──➣*
+*┃👤 ᴏᴡɴᴇʀ :* Zakuna
+*┃📞 ɴᴜᴍʙᴇʀ :* 94760576138
+*╰──────────────➣*
+
+> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴢᴀᴋᴜɴᴀ ᴍɪɴɪ </>`;
+            await conn.sendMessage(from, { image: { url: botImage }, caption: aliveMsg }, { quoted: mek });
         }
 
-        if (!text) return;
+        if (command === '.menu') {
+            let menuMsg = `✨ *ZAKUNA-MINI MEGA MENU* ✨
 
-        // 2. Alive Command
-        if (text === '.alive') {
-            await sock.sendMessage(from, { text: '✨ *Bot is Alive & Working!*' });
-        }
+👑 *Owner Info*
+ ├ 🧑‍💻 *Name:* Nadil Hansaja
+ ├ 🎂 *Age:* 20 Years
+ └ 📍 *Location:* Buttala, LK
 
-        // 3. Menu Command
-        if (text === '.menu') {
-            const menu = `
-┌───「 *ZAKUNA-MINI* 」───
-│ 👑 Owner: Akash
-│ ⌛ Uptime: ${process.uptime().toFixed(2)}s
-└────────────────────
-│ ➣ .alive
-│ ➣ .song [name]
-│ ➣ .video [name]
-│ ➣ .ping
-│ ➣ .owner
-└────────────────────`;
-            await sock.sendMessage(from, { text: menu });
-        }
+📊 *Bot Status*
+ ├ ⚙️ *Prefix:* [ . ]
+ ├ 🕒 *Uptime:* ${getUptime()}
+ ├ 🟢 *Auto Status Seen:* ON
+ └ 💖 *Status React:* ❤️
 
-        // 4. Ping Command
-        if (text === '.ping') {
-            await sock.sendMessage(from, { text: '🚀 Pong!' });
-        }
+🤖 *MAIN COMMANDS*
+ ├ 👋 .alive 
+ ├ ⚡ .ping 
+ └ 👤 .owner 
 
-        // 5. Song Downloader
-        if (text.startsWith('.song ')) {
-            const query = text.replace('.song ', '');
-            const res = await yts(query);
-            const video = res.videos[0];
-            await sock.sendMessage(from, { text: `🎵 *${video.title}*\n🔗 ${video.url}` });
-        }
-        
-        // 6. Video Downloader
-        if (text.startsWith('.video ')) {
-            const query = text.replace('.video ', '');
-            const res = await yts(query);
-            const video = res.videos[0];
-            await sock.sendMessage(from, { text: `🎬 *${video.title}*\n🔗 ${video.url}` });
-        }
+📥 *DOWNLOAD COMMANDS*
+ ├ 🎵 .song [නම] - Audio Download
+ ├ 📹 .video [නම] - Video Download
+ ├ 📘 .fb [Link] - Facebook Video
+ ├ 🎵 .tiktok [Link] - TikTok Video
+ ├ 📸 .ig [Link] - Instagram Video
+ └ 🎯 .status - Status Download
 
-        // 7. Owner Command
-        if (text === '.owner') {
-            await sock.sendMessage(from, { text: 'Contact Owner: wa.me/947XXXXXXXX' });
+🎨 *CREATIVE COMMANDS*
+ └ ✍️ .logo [නම] 
+
+👥 *GROUP COMMANDS*
+ └ 📢 .tagall - Tag All
+
+⚙️ _Powerd by ZAKUNA-MD Team_`;
+            await conn.sendMessage(from, { image: { url: botImage }, caption: menuMsg }, { quoted: mek });
         }
     });
 
-    sock.ev.on('creds.update', saveCreds);
+    conn.ev.on("connection.update", (update) => {
+        if (update.connection === "open") console.log("✅ ZAKUNA-MD සූදානම්!");
+    });
 }
 startBot();
-
+EOF
