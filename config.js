@@ -1,6 +1,6 @@
 module.exports = {
-    ownerNumber: '947XXXXXXXX', // ඔයාගේ නම්බර් එක
+    ownerNumber: '94760576138', // 👈 මෙතනට '947XXXXXXXX' වෙනුවට ඔයාගේ ඇත්තම WhatsApp Number එක දෙන්න (බිංදුව නැතුව 94න් පටන් ගන්න)
     botName: 'ZAKUNA-MINI',
     prefix: '.',
-    publicMode: true
+    publicKey: true
 };
