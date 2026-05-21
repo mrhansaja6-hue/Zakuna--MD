@@ -1,0 +1,19 @@
+{
+  "name": "zakuna-mini",
+  "version": "1.0.0",
+  "description": "WhatsApp Bot Zanta-Mini",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "latest",
+    "pino": "latest",
+    "qrcode-terminal": "latest",
+    "yt-search": "latest",
+    "moment-timezone": "latest"
+  },
+  "author": "Nadil Hansaja",
+  "license": "MIT"
+}
+
